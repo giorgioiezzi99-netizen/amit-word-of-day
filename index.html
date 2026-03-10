@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amit's Word of the Day</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-color: #050505;
+            --card-bg: rgba(20, 20, 22, 0.75);
+            --text-primary: #ededed;
+            --text-secondary: #a1a1aa;
+            --accent-color: #3b82f6;
+            --accent-blue: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.25);
+            --surface-border: rgba(255, 255, 255, 0.08);
+            --btn-bg: rgba(255, 255, 255, 0.05);
+            --btn-hover: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.12), transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.12), transparent 40%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            padding: 1.5rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.25rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--surface-border);
+            background: var(--btn-bg);
+            color: var(--text-primary);
+            backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--btn-hover);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--surface-border);
+            border-radius: 20px;
+            padding: 2.5rem 3rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .card.fade-out {
+            opacity: 0;
+            transform: scale(0.98);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .content-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .section h2 {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .section p {
+            font-size: 1.05rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        p.italic {
+            font-style: italic;
+            color: #d4d4d8;
+        }
+
+        .highlight-word {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .comment-section {
+            margin-top: 0.5rem;
+        }
+
+        .comment-section p {
+            color: var(--text-secondary);
+        }
+
+        .bottom-actions {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--btn-bg);
+            color: var(--text-primary);
+        }
+
+        .action-btn.active {
+            color: var(--accent-color);
+            background: var(--accent-glow);
+        }
+
+        .record-btn {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--surface-border);
+        }
+
+        .record-btn:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .record-btn.recording {
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.5);
+            background: rgba(239, 68, 68, 0.1);
+            animation: pulse-red 1.5s infinite;
+            transform: scale(1.1);
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        .score-badge {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
+            padding: 0.4rem 1rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
+        }
+
+        .score-badge.low-score {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.05));
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1);
+        }
+
+        .score-badge.medium-score {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.05));
+            border-color: rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.1);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            right: 0;
+            min-width: 150px;
+            background: rgba(20, 20, 25, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 0.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .dropdown-menu ul::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-menu ul::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .dropdown-menu li {
+            padding: 0.5rem 0.8rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .dropdown-menu li:not(.empty-history):hover {
+            background: var(--btn-bg);
+            color: var(--text-primary);
+        }
+
+        .dropdown-menu li.empty-history {
+            cursor: default;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .toast {
+            position: absolute;
+            bottom: -3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--surface-border);
+            color: #fff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            bottom: 2rem;
+            opacity: 1;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 2rem 1.5rem;
+            }
+
+            .word-section {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <button id="newWordBtn" class="btn primary-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
+                    <path d="M21 3v5h-5"></path>
+                </svg>
+                Give me a new one
+            </button>
+        </header>
+
+        <main class="card" id="wordCard">
+            <div class="card-header">
+                <h2 class="title" style="font-size: 1.1rem; color: var(--text-secondary); font-weight: 500;">Word of the
+                    Day</h2>
+            </div>
+
+            <div class="word-section" style="flex-direction: column; gap: 0.5rem; margin-bottom: 2.5rem;">
+                <h1 id="wordTitle">Inscrutable</h1>
+                <div class="pronunciation-row"
+                    style="display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0.8rem; min-height: 80px;">
+
+                    <!-- Game State: Recording UI -->
+                    <div id="recordingUI"
+                        style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                        <button id="recordBtn" class="action-btn record-btn" title="Hold to Speak"
+                            style="width: 50px; height: 50px; border-radius: 50%; background: var(--btn-bg);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                <line x1="12" y1="19" x2="12" y2="22"></line>
+                            </svg>
+                        </button>
+                        <span id="recordStatus" style="font-size: 0.8rem; color: var(--text-secondary);">Click to test
+                            your pronunciation</span>
+                        <a href="#" id="skipBtn"
+                            style="display: none; font-size: 0.8rem; color: var(--accent-blue); text-decoration: underline; margin-top: -4px;">Skip</a>
+                    </div>
+
+                    <!-- Game State: Result UI (Hidden initially) -->
+                    <div id="resultUI"
+                        style="display: none; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: center; width: 100%;">
+                        <div id="scoreDisplay" class="score-badge">
+                            <span id="scoreValue">0%</span> Match
+                        </div>
+
+                        <div
+                            style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.03); padding: 0.3rem 0.8rem; border-radius: 999px; border: 1px solid var(--surface-border);">
+                            <span id="wordPhonetic" class="phonetic-text"
+                                style="font-size: 1rem; color: var(--text-primary); letter-spacing: 0.5px;"></span>
+                            <button id="listenBtn" class="action-btn" title="Listen to correct pronunciation"
+                                style="width: 32px; height: 32px; color: var(--accent-color);">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="section">
+                    <h2>Definition:</h2>
+                    <p id="wordDefinition"></p>
+                </div>
+
+                <div class="section">
+                    <h2>Use it in a sentence:</h2>
+                    <p id="wordSentence" class="italic"></p>
+                </div>
+
+                <div class="section comment-section" id="commentSection">
+                    <p id="wordComment"></p>
+                </div>
+            </div>
+
+            <div class="bottom-actions">
+                <button id="copyBtn" class="action-btn" title="Copy text">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+                <button id="likeBtn" class="action-btn" title="Like">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3">
+                        </path>
+                    </svg>
+                </button>
+                <button id="dislikeBtn" class="action-btn" title="Dislike">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17">
+                        </path>
+                    </svg>
+                </button>
+
+                <div class="history-container" style="position: relative; margin-left: auto;">
+                    <button id="historyBtn" class="action-btn" title="Recent Words"
+                        style="width: auto; padding: 0 0.8rem; gap: 0.4rem; font-size: 0.85rem;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        History
+                    </button>
+                    <div id="historyDropdown" class="dropdown-menu">
+                        <ul id="historyList">
+                            <li class="empty-history" style="opacity: 0.5;">No past words yet</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="toast" class="toast">Copied to clipboard!</div>
+        </main>
+
+    </div>
+
+    <script>
+        // ─── WORDS DATABASE ───────────────────────────────────────────────────────
+        const wordsDatabase = [
+            { word: "Defalcation", phonetic: "dee-fal-kay-shun", definition: "Misappropriation of money or funds held by an official, trustee, or other fiduciary.", sentence: "The executive was fired after an audit revealed a massive defalcation of corporate resources.", comment: "A highly formal term for embezzlement." },
+            { word: "Seigniorage", phonetic: "seen-yer-ij", definition: "Profit made by a government by issuing currency, specifically the difference between the face value of coins and their production costs.", sentence: "The Treasury relies heavily on seigniorage to fund public works projects without raising taxes.", comment: "The hidden tax of printing money." },
+            { word: "Usufruct", phonetic: "yoo-zoo-fruhkt", definition: "The right to enjoy the use and advantages of another's property short of the destruction or waste of its substance.", sentence: "The heir was granted usufruct of the estate, allowing him to collect rents while his sister retained ownership.", comment: "Having your cake and eating it too, legally speaking." },
+            { word: "Rentier", phonetic: "rahn-tyay", definition: "A person living on income from property or investments.", sentence: "The new tax policies were heavily criticized for favoring the wealthy rentier class over the working population.", comment: "Passive income masters." },
+            { word: "Monopsony", phonetic: "muh-nop-suh-nee", definition: "A market situation in which there is only one buyer.", sentence: "Because the government is the only purchaser of military jets, it operates as a powerful monopsony in the defense sector.", comment: "Monoline's lesser-known cousin." },
+            { word: "Autarky", phonetic: "aw-tar-kee", definition: "Economic independence or self-sufficiency.", sentence: "The isolated nation strived for absolute autarky, refusing to engage in any global trade agreements.", comment: "The ultimate DIY economy." },
+            { word: "Tontine", phonetic: "ton-teen", definition: "An annuity shared by subscribers to a loan or common fund, the shares increasing as subscribers die until the last survivor enjoys the whole income.", sentence: "What began as a friendly investment pool turned dark when the tontine promised millions to the sole survivor.", comment: "The most morbid of all financial instruments." },
+            { word: "Agio", phonetic: "a-jee-oh", definition: "The percentage charged on changing one currency into another, or a premium on money in exchange.", sentence: "The merchant calculated the steep agio before agreeing to accept the foreign gold coins.", comment: "The classic exchange-rate skim." },
+            { word: "Contango", phonetic: "kon-tang-goh", definition: "A situation where the futures price of a commodity is higher than the spot price.", sentence: "The oil market slipped into deep contango as traders anticipated a massive spike in winter demand.", comment: "When the future costs more than the present." },
+            { word: "Backwardation", phonetic: "bak-wer-day-shun", definition: "A situation where the spot price of a commodity is higher than the forward price.", sentence: "A sudden supply shock threw the copper market into extreme backwardation, panicking industrial buyers.", comment: "When today is worth more than tomorrow." },
+            { word: "Parvenu", phonetic: "par-vuh-noo", definition: "A person of obscure origin who has gained wealth, influence, or celebrity.", sentence: "The established banking families sneered at the tech billionaire, dismissing him as a vulgar parvenu.", comment: "Old money's favorite insult for new money." },
+            { word: "Sybarite", phonetic: "sib-uh-rahyt", definition: "A person who is self-indulgent in their fondness for sensuous luxury.", sentence: "After cashing out his stock options, he lived as a true sybarite, flying strictly private and staying in penthouses.", comment: "Luxury as a lifestyle." },
+            { word: "Lucre", phonetic: "loo-ker", definition: "Money, especially when regarded as sordid or distasteful or gained in a dishonorable way.", sentence: "He abandoned his artistic principles entirely for the filthy lucre of corporate advertising.", comment: "Always paired with 'filthy'." },
+            { word: "Pelf", phonetic: "pelf", definition: "Money, especially when gained in a dishonest or dishonorable way.", sentence: "The corrupt politician was finally caught hiding the illicit pelf in offshore shell companies.", comment: "The pirate's plunder." },
+            { word: "Sinecure", phonetic: "sahy-ni-kyoor", definition: "A position requiring little or no work but giving the holder status or financial benefit.", sentence: "Appointed to the board as a mere sinecure, he collected a six-figure salary without ever attending a meeting.", comment: "The ultimate dream job." },
+            { word: "Penury", phonetic: "pen-yuh-ree", definition: "Extreme poverty; destitution.", sentence: "After the market crash wiped out his leveraged portfolio, the former tycoon was reduced to absolute penury.", comment: "From riches to rags." },
+            { word: "Rehypothecation", phonetic: "ree-hahy-poth-i-kay-shun", definition: "The practice by banks and brokers of using, for their own purposes, assets that have been posted as collateral by their clients.", sentence: "The hedge fund collapsed when it was discovered their prime broker had engaged in aggressive rehypothecation of their assets.", comment: "Borrowing against what isn't yours." },
+            { word: "Obfuscate", phonetic: "ob-fuh-skeyt", definition: "Render obscure, unclear, or unintelligible.", sentence: "The CEO attempted to obfuscate the terrible quarterly earnings by flooding the report with meaningless jargon.", comment: "Burying the truth in buzzwords." },
+            { word: "Perquisite", phonetic: "pur-kwuh-zit", definition: "A perk or benefit explicitly tied to a job role.", sentence: "Unlimited use of the corporate jet was just one perquisite of the newly negotiated executive contract.", comment: "Where 'perk' comes from." },
+            { word: "Sycophant", phonetic: "sik-uh-fuhnt", definition: "A person who acts obsequiously toward someone important in order to gain advantage.", sentence: "The billionaire was constantly surrounded by a swarm of sycophants who agreed with his every terrible idea.", comment: "The classic yes-man." },
+            { word: "Quixotic", phonetic: "kwik-sot-ik", definition: "Extremely idealistic; unrealistic and impractical.", sentence: "The founder's quixotic quest to build a colony on Mars drained the company's capital entirely.", comment: "Chasing windmills." },
+            { word: "Esoteric", phonetic: "es-uh-ter-ik", definition: "Intended for or likely to be understood by only a small number of people with a specialized knowledge or interest.", sentence: "The quantitative analyst spoke in such esoteric mathematical terms that the board had no idea what he was recommending.", comment: "For the absolute nerds." },
+            { word: "Exigency", phonetic: "ek-si-juhn-see", definition: "An urgent need or demand.", sentence: "Due to the financial exigency of the upcoming debt maturity, the company was forced into a fire sale of its prime assets.", comment: "Desperate times require desperate measures." },
+            { word: "Munificent", phonetic: "myoo-nif-uh-suhnt", definition: "Larger or more generous than is usual or necessary.", sentence: "The anonymous donor made a shockingly munificent contribution that wiped out the charity's entire operating deficit.", comment: "Generosity on steroids." },
+            { word: "Avarice", phonetic: "av-er-is", definition: "Extreme greed for wealth or material gain.", sentence: "Driven entirely by blind avarice, the traders ignored the obvious ethical boundaries and manipulated the index.", comment: "The deadliest of the financial sins." },
+            { word: "Fugazi", phonetic: "foo-gah-zee", definition: "Fake, imitation, or completely fabricated; devoid of substance.", sentence: "The entire balance sheet of the shell company turned out to be a total fugazi.", comment: "It's a wazi, it's a woozi." },
+            { word: "Oligopsony", phonetic: "ol-i-gop-suh-nee", definition: "A state of the market in which only a small number of buyers exists for a product.", sentence: "Because only three massive retail chains control distribution, farmers are trapped selling their crops into an unforgiving oligopsony.", comment: "When buyers team up to crush the sellers." },
+            { word: "Contumacious", phonetic: "kon-choo-mey-shuhs", definition: "Stubbornly or willfully disobedient to authority.", sentence: "The contumacious founder refused to step down even after the board unanimously voted to oust him.", comment: "A $10 word for rebel." },
+            { word: "Vituperate", phonetic: "vahy-too-puh-reyt", definition: "Blame or insult someone in strong or violent language.", sentence: "During the hostile takeover, the opposing CEOs began to vituperate each other publicly on social media.", comment: "Professional mud-slinging." },
+            { word: "Fribble", phonetic: "frib-uhl", definition: "A frivolous or foolish person; to waste time or money on trifles.", sentence: "Rather than investing the windfall wisely, he managed to fribble it away entirely on luxury cars and vacations.", comment: "How most lottery winners go bankrupt." }
+        ];
+
+        // ─── APP LOGIC ────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const wordTitle = document.getElementById('wordTitle');
+            const wordDefinition = document.getElementById('wordDefinition');
+            const wordSentence = document.getElementById('wordSentence');
+            const wordComment = document.getElementById('wordComment');
+            const commentSection = document.getElementById('commentSection');
+            const newWordBtn = document.getElementById('newWordBtn');
+            const listenBtn = document.getElementById('listenBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const wordCard = document.getElementById('wordCard');
+            const toast = document.getElementById('toast');
+            const wordPhonetic = document.getElementById('wordPhonetic');
+            const recordBtn = document.getElementById('recordBtn');
+            const recordStatus = document.getElementById('recordStatus');
+            const recordingUI = document.getElementById('recordingUI');
+            const resultUI = document.getElementById('resultUI');
+            const scoreBadge = document.getElementById('scoreDisplay');
+            const scoreValue = document.getElementById('scoreValue');
+            const skipBtn = document.getElementById('skipBtn');
+            const likeBtn = document.getElementById('likeBtn');
+            const dislikeBtn = document.getElementById('dislikeBtn');
+            const historyBtn = document.getElementById('historyBtn');
+            const historyDropdown = document.getElementById('historyDropdown');
+            const historyList = document.getElementById('historyList');
+
+            let availableWords = [...wordsDatabase];
+            let currentWordObj = null;
+            let wordHistory = [];
+
+            const synth = window.speechSynthesis;
+            let availableVoices = [];
+
+            function loadVoices() { availableVoices = synth.getVoices(); }
+            loadVoices();
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = loadVoices;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let recognition = null;
+            let isRecording = false;
+            let micPermissionGranted = false;
+
+            // ── Pre-request mic permission once on page load ──────────────────────
+            // This prevents Chrome from asking on EVERY click when opened as file://
+            // Safari requires HTTPS for this API, so we check first
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        micPermissionGranted = true;
+                        // Release the stream immediately — we just needed the permission
+                        stream.getTracks().forEach(t => t.stop());
+                    })
+                    .catch(err => {
+                        console.warn('Mic pre-permission denied or not available:', err.name);
+                    });
+            }
+
+            if (SpeechRecognition) {
+                try {
+                    recognition = new SpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.lang = 'en-US';
+                    recognition.interimResults = false;
+                    recognition.maxAlternatives = 1;
+
+                    let recognitionTimeout = null;
+
+                    recognition.onstart = () => {
+                        isRecording = true;
+                        recordBtn.classList.add('recording');
+                        recordStatus.textContent = "Listening...";
+                        clearTimeout(recognitionTimeout);
+                        recognitionTimeout = setTimeout(() => {
+                            if (isRecording) { try { recognition.stop(); } catch (e) { } }
+                        }, 3500);
+                    };
+
+                    recognition.onresult = (event) => {
+                        clearTimeout(recognitionTimeout);
+                        const transcript = event.results[event.resultIndex][0].transcript.trim().toLowerCase();
+                        calculateAndShowScore(transcript, currentWordObj.word.toLowerCase());
+                    };
+
+                    recognition.onerror = (event) => {
+                        clearTimeout(recognitionTimeout);
+                        console.error("Speech recognition error", event.error);
+                        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                            recordStatus.textContent = "Mic blocked — allow it in browser settings.";
+                            skipBtn.style.display = 'inline-block';
+                        } else if (event.error === 'aborted') {
+                            recordStatus.textContent = "Recording aborted. Try again.";
+                            skipBtn.style.display = 'inline-block';
+                        } else if (event.error === 'no-speech') {
+                            recordStatus.textContent = "Didn't catch that. Try again.";
+                        } else if (event.error === 'network') {
+                            recordStatus.textContent = "No internet for speech. Use offline skip ↓";
+                            skipBtn.style.display = 'inline-block';
+                        } else {
+                            recordStatus.textContent = "Error: " + event.error;
+                        }
+                        recordBtn.classList.remove('recording');
+                        isRecording = false;
+                    };
+
+                    recognition.onend = () => {
+                        isRecording = false;
+                        recordBtn.classList.remove('recording');
+                        if (recordingUI.style.display !== 'none') {
+                            if (recordStatus.textContent === "Listening..." || recordStatus.textContent === "Recording aborted. Try again.") {
+                                setTimeout(() => {
+                                    if (recordingUI.style.display !== 'none') recordStatus.textContent = "Click to test your pronunciation";
+                                }, 2000);
+                            }
+                        }
+                    };
+
+                } catch (e) {
+                    console.error("Failed to initialize SpeechRecognition:", e);
+                    setupMicFallback("Microphone init failed. Try Chrome.");
+                }
+            } else {
+                // Safari on file:// or old browser — speech API unavailable
+                setupMicFallback("Mic needs HTTPS. Use Skip ↓ or open via Chrome.");
+            }
+
+            function setupMicFallback(msg) {
+                recordStatus.innerHTML = msg;
+                recordBtn.style.opacity = '0.5';
+                recordBtn.style.cursor = 'not-allowed';
+                skipBtn.style.display = 'inline-block';
+            }
+
+            skipBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                recordStatus.textContent = "Skipping mic check...";
+                setTimeout(() => { calculateAndShowScore("", currentWordObj.word.toLowerCase()); }, 300);
+            });
+
+            function similarityScore(s1, s2) {
+                let longer = s1, shorter = s2;
+                if (s1.length < s2.length) { longer = s2; shorter = s1; }
+                let longerLength = longer.length;
+                if (longerLength == 0) return 1.0;
+                return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+            }
+
+            function editDistance(s1, s2) {
+                s1 = s1.toLowerCase(); s2 = s2.toLowerCase();
+                let costs = [];
+                for (let i = 0; i <= s1.length; i++) {
+                    let lastValue = i;
+                    for (let j = 0; j <= s2.length; j++) {
+                        if (i == 0) { costs[j] = j; }
+                        else if (j > 0) {
+                            let newValue = costs[j - 1];
+                            if (s1.charAt(i - 1) != s2.charAt(j - 1))
+                                newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                            costs[j - 1] = lastValue;
+                            lastValue = newValue;
+                        }
+                    }
+                    if (i > 0) costs[s2.length] = lastValue;
+                }
+                return costs[s2.length];
+            }
+
+            function calculateAndShowScore(spokenWord, targetWord) {
+                let rawScore = 0;
+                if (spokenWord === targetWord || spokenWord.includes(targetWord) || targetWord.includes(spokenWord)) {
+                    rawScore = 1.0;
+                } else {
+                    rawScore = similarityScore(spokenWord, targetWord);
+                }
+                let percentage = Math.round(rawScore * 100);
+                if (percentage > 70 && percentage < 100) percentage += 10;
+                if (percentage > 100) percentage = 100;
+
+                scoreValue.textContent = percentage + "%";
+                scoreBadge.className = 'score-badge';
+                let commentText = "";
+                if (percentage >= 80) {
+                    commentText = "🎯 Excellent!";
+                } else if (percentage >= 50) {
+                    scoreBadge.classList.add('medium-score');
+                    commentText = "👍 Getting there!";
+                } else {
+                    scoreBadge.classList.add('low-score');
+                    commentText = "❌ Try listening first.";
+                }
+                recordStatus.textContent = commentText;
+                recordingUI.style.display = 'none';
+                resultUI.style.display = 'flex';
+                setTimeout(() => { listenBtn.click(); }, 800);
+            }
+
+            function getRandomWord() {
+                if (availableWords.length === 0) availableWords = [...wordsDatabase];
+                const randomIndex = Math.floor(Math.random() * availableWords.length);
+                const wordObj = availableWords[randomIndex];
+                availableWords.splice(randomIndex, 1);
+                currentWordObj = wordObj;
+                if (!wordHistory.includes(wordObj)) {
+                    wordHistory.unshift(wordObj);
+                    if (wordHistory.length > 10) wordHistory.pop();
+                    renderHistory();
+                }
+                likeBtn.classList.remove('active');
+                dislikeBtn.classList.remove('active');
+                return wordObj;
+            }
+
+            function renderHistory() {
+                if (wordHistory.length <= 1) return;
+                historyList.innerHTML = '';
+                for (let i = 1; i < wordHistory.length; i++) {
+                    const li = document.createElement('li');
+                    li.textContent = wordHistory[i].word;
+                    li.addEventListener('click', () => {
+                        wordCard.classList.add('fade-out');
+                        setTimeout(() => {
+                            currentWordObj = wordHistory[i];
+                            updateUI(currentWordObj);
+                            wordCard.classList.remove('fade-out');
+                            historyDropdown.classList.remove('show');
+                        }, 150);
+                    });
+                    historyList.appendChild(li);
+                }
+            }
+
+            function updateUI(wordObj) {
+                recordingUI.style.display = 'flex';
+                resultUI.style.display = 'none';
+                skipBtn.style.display = 'none';
+                recordStatus.textContent = "Click to test your pronunciation";
+                if (SpeechRecognition) {
+                    recordBtn.style.opacity = '1';
+                    recordBtn.style.cursor = 'pointer';
+                }
+                wordTitle.textContent = wordObj.word;
+                wordPhonetic.textContent = wordObj.phonetic;
+                wordDefinition.textContent = wordObj.definition;
+                const regex = new RegExp(`\\b${wordObj.word}\\b`, 'gi');
+                const highlightedSentence = wordObj.sentence.replace(regex, `<span class="highlight-word">$&</span>`);
+                wordSentence.innerHTML = highlightedSentence;
+                if (wordObj.comment) {
+                    wordComment.textContent = wordObj.comment;
+                    commentSection.style.display = 'block';
+                } else {
+                    commentSection.style.display = 'none';
+                }
+            }
+
+            function showToast() {
+                toast.classList.add('show');
+                setTimeout(() => { toast.classList.remove('show'); }, 2000);
+            }
+
+            function fallbackCopy(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                try { document.execCommand('copy'); showToast(); }
+                catch (e) { console.error('Fallback copy failed:', e); }
+                document.body.removeChild(textarea);
+            }
+
+            // Event Listeners
+            newWordBtn.addEventListener('click', () => {
+                wordCard.classList.add('fade-out');
+                setTimeout(() => {
+                    const nextWord = getRandomWord();
+                    updateUI(nextWord);
+                    wordCard.classList.remove('fade-out');
+                }, 150);
+            });
+
+            listenBtn.addEventListener('click', () => {
+                const textToRead = wordTitle.textContent;
+                if (synth.speaking) synth.cancel();
+                const utterThis = new SpeechSynthesisUtterance(textToRead);
+                let voices = availableVoices.length > 0 ? availableVoices : synth.getVoices();
+                let selectedVoice = null;
+                const preferredVoices = ['Samantha', 'Victoria', 'Google US English'];
+                for (const name of preferredVoices) {
+                    selectedVoice = voices.find(v => v.name === name);
+                    if (selectedVoice) break;
+                }
+                if (!selectedVoice) {
+                    selectedVoice = voices.find(v => v.lang === 'en-US' &&
+                        !v.name.toLowerCase().includes('robot') &&
+                        !v.name.toLowerCase().includes('alex') &&
+                        !v.name.toLowerCase().includes('daniel') &&
+                        !v.name.toLowerCase().includes('fred') &&
+                        !v.name.toLowerCase().includes('bruce') &&
+                        !v.name.toLowerCase().includes('ralph'));
+                }
+                if (!selectedVoice) selectedVoice = voices.find(v => v.lang.includes('en'));
+                if (selectedVoice) utterThis.voice = selectedVoice;
+                utterThis.rate = 0.85;
+                utterThis.pitch = selectedVoice && selectedVoice.name === 'Samantha' ? 1.0 : 1.05;
+                synth.speak(utterThis);
+                listenBtn.classList.add('active');
+                utterThis.onend = () => { listenBtn.classList.remove('active'); };
+            });
+
+            copyBtn.addEventListener('click', () => {
+                const textToCopy = `Word of the Day: ${currentWordObj.word}\n\nDefinition:\n${currentWordObj.definition}\n\nUse it in a sentence:\n${currentWordObj.sentence}${currentWordObj.comment ? `\n\n${currentWordObj.comment}` : ''}`;
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(textToCopy).then(showToast).catch(() => fallbackCopy(textToCopy));
+                } else {
+                    fallbackCopy(textToCopy);
+                }
+            });
+
+            recordBtn.addEventListener('click', () => {
+                if (!recognition) return;
+                if (isRecording) {
+                    try { recognition.stop(); } catch (e) { }
+                } else {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.error("Recognition couldn't start", e);
+                        if (e.name === "InvalidStateError") { try { recognition.stop(); } catch (err) { } }
+                    }
+                }
+            });
+
+            likeBtn.addEventListener('click', () => {
+                likeBtn.classList.toggle('active');
+                dislikeBtn.classList.remove('active');
+            });
+
+            dislikeBtn.addEventListener('click', () => {
+                dislikeBtn.classList.toggle('active');
+                likeBtn.classList.remove('active');
+            });
+
+            historyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                historyDropdown.classList.toggle('show');
+            });
+
+            document.addEventListener('click', () => {
+                historyDropdown.classList.remove('show');
+            });
+
+            // Initial load
+            const firstWord = getRandomWord();
+            updateUI(firstWord);
+        });
+    </script>
+</body>
+
+</html>
